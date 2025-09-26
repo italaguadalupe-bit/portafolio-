@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Itala Suárez - Asesora Comercial del sector Farmacéutica</title>
+    <title>Itala Guadalupe Suárez Santos - Asesora Comercial del sector Farmacéutica</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -348,30 +348,41 @@
                     </div>
                 </div>
                 <div class="contact-form">
-                    <form>
+                    <!-- Formulario de contacto integrado con Formspree -->
+                    <form id="contactForm" action="https://formspree.io/f/mrbybonr" method="POST">
+                        <!-- Campo Nombre - obligatorio -->
                         <div class="form-group">
                             <input type="text" id="nombre" name="nombre" placeholder="Nombre completo" required>
+                            <div class="form-error" id="nombre-error"></div>
                         </div>
+                        
+                        <!-- Campo Correo electrónico - obligatorio con validación -->
                         <div class="form-group">
                             <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
+                            <div class="form-error" id="email-error"></div>
                         </div>
+                        
+                        <!-- Campo Mensaje - obligatorio -->
                         <div class="form-group">
-                            <input type="text" id="empresa" name="empresa" placeholder="Empresa">
+                            <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..." rows="5" required></textarea>
+                            <div class="form-error" id="mensaje-error"></div>
                         </div>
-                        <div class="form-group">
-                            <select id="servicio" name="servicio" required>
-                                <option value="">Selecciona un servicio</option>
-                                <option value="estrategia">Estrategia Comercial</option>
-                                <option value="capacitacion">Capacitación de Equipos</option>
-                                <option value="desarrollo">Desarrollo de Negocios</option>
-                                <option value="optimizacion">Optimización de Procesos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="mensaje" name="mensaje" placeholder="Cuéntame sobre tu proyecto" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-full">Enviar Mensaje</button>
+                        
+                        <!-- Botón de envío -->
+                        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+                            <span class="btn-text">Enviar Mensaje</span>
+                            <span class="btn-loading" style="display: none;">Enviando...</span>
+                        </button>
                     </form>
+                    
+                    <!-- Mensaje de confirmación (se mostrará después del envío) -->
+                    <div id="successMessage" class="success-message" style="display: none;">
+                        <div class="success-content">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>¡Mensaje Enviado!</h3>
+                            <p>Tu mensaje ha sido enviado correctamente. Te contactaremos pronto.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

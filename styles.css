@@ -697,11 +697,79 @@ body {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-group textarea {
     resize: vertical;
     min-height: 120px;
+}
+
+/* Estilos para mensajes de error del formulario */
+.form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-error.show {
+    display: block;
+}
+
+/* Estilos para campos con error */
+.form-group input.error,
+.form-group textarea.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Estilos para el botón de envío con estado de carga */
+.btn-loading {
+    display: none;
+}
+
+.btn.loading .btn-text {
+    display: none;
+}
+
+.btn.loading .btn-loading {
+    display: inline;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Mensaje de éxito del formulario */
+.success-message {
+    background: #f0fdf4;
+    border: 2px solid #22c55e;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.success-content i {
+    font-size: 3rem;
+    color: #22c55e;
+    margin-bottom: 1rem;
+}
+
+.success-content h3 {
+    color: #15803d;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.success-content p {
+    color: #166534;
+    font-size: 1rem;
+    margin: 0;
 }
 
 .btn-full {

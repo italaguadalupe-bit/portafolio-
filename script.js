@@ -82,34 +82,179 @@ document.addEventListener('DOMContentLoaded', () => {
     animateElements.forEach(el => observer.observe(el));
 });
 
-// Form submission handling
-const contactForm = document.querySelector('.contact-form form');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        
-        // Simple validation
-        if (!data.nombre || !data.email || !data.servicio || !data.mensaje) {
-            showNotification('Por favor, completa todos los campos obligatorios.', 'error');
-            return;
-        }
-        
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(data.email)) {
-            showNotification('Por favor, ingresa un email válido.', 'error');
-            return;
-        }
-        
-        // Simulate form submission
-        showNotification('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success');
-        this.reset();
-    });
+// ===== VALIDACIÓN Y ENVÍO DE FORMULARIO CON FORMSPREE =====
+
+// Función para validar el formato del email
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
+
+// Función para mostrar errores en campos específicos
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const errorDiv = document.getElementById(fieldId + '-error');
+    
+    // Agregar clase de error al campo
+    field.classList.add('error');
+    
+    // Mostrar mensaje de error
+    errorDiv.textContent = message;
+    errorDiv.classList.add('show');
+}
+
+// Función para limpiar errores de un campo
+function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const errorDiv = document.getElementById(fieldId + '-error');
+    
+    // Quitar clase de error del campo
+    field.classList.remove('error');
+    
+    // Ocultar mensaje de error
+    errorDiv.classList.remove('show');
+    errorDiv.textContent = '';
+}
+
+// Función para limpiar todos los errores
+function clearAllErrors() {
+    clearFieldError('nombre');
+    clearFieldError('email');
+    clearFieldError('mensaje');
+}
+
+// Función para validar el formulario completo
+function validateForm() {
+    let isValid = true;
+    
+    // Obtener valores de los campos
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const mensaje = document.getElementById('mensaje').value.trim();
+    
+    // Limpiar errores anteriores
+    clearAllErrors();
+    
+    // Validar campo Nombre
+    if (!nombre) {
+        showFieldError('nombre', 'El nombre es obligatorio');
+        isValid = false;
+    } else if (nombre.length < 2) {
+        showFieldError('nombre', 'El nombre debe tener al menos 2 caracteres');
+        isValid = false;
+    }
+    
+    // Validar campo Email
+    if (!email) {
+        showFieldError('email', 'El correo electrónico es obligatorio');
+        isValid = false;
+    } else if (!validateEmail(email)) {
+        showFieldError('email', 'Por favor, ingresa un correo electrónico válido');
+        isValid = false;
+    }
+    
+    // Validar campo Mensaje
+    if (!mensaje) {
+        showFieldError('mensaje', 'El mensaje es obligatorio');
+        isValid = false;
+    } else if (mensaje.length < 10) {
+        showFieldError('mensaje', 'El mensaje debe tener al menos 10 caracteres');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Manejo del envío del formulario con Formspree
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevenir envío por defecto
+            
+            // Validar formulario antes de enviar
+            if (!validateForm()) {
+                showNotification('Por favor, corrige los errores en el formulario', 'error');
+                return;
+            }
+            
+            // Mostrar estado de carga
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            
+            try {
+                // Crear FormData con los datos del formulario
+                const formData = new FormData(this);
+                
+                // Enviar datos a Formspree
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Éxito: mostrar mensaje de confirmación
+                    contactForm.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    // Mostrar notificación adicional
+                    showNotification('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success');
+                    
+                    // Limpiar formulario (por si se vuelve a mostrar)
+                    this.reset();
+                    clearAllErrors();
+                    
+                } else {
+                    // Error del servidor
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al enviar el mensaje');
+                }
+                
+            } catch (error) {
+                // Error de red o validación
+                console.error('Error:', error);
+                showNotification('Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo.', 'error');
+            } finally {
+                // Restaurar estado del botón
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Validación en tiempo real para mejorar UX
+        const fields = ['nombre', 'email', 'mensaje'];
+        
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            
+            // Limpiar errores cuando el usuario empiece a escribir
+            field.addEventListener('input', function() {
+                if (this.classList.contains('error')) {
+                    clearFieldError(fieldId);
+                }
+            });
+            
+            // Validar campo cuando pierda el foco
+            field.addEventListener('blur', function() {
+                const value = this.value.trim();
+                
+                if (fieldId === 'nombre' && value && value.length < 2) {
+                    showFieldError(fieldId, 'El nombre debe tener al menos 2 caracteres');
+                } else if (fieldId === 'email' && value && !validateEmail(value)) {
+                    showFieldError(fieldId, 'Por favor, ingresa un correo electrónico válido');
+                } else if (fieldId === 'mensaje' && value && value.length < 10) {
+                    showFieldError(fieldId, 'El mensaje debe tener al menos 10 caracteres');
+                }
+            });
+        });
+    }
+});
 
 // Notification system
 function showNotification(message, type = 'info') {
